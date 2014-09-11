@@ -2,8 +2,13 @@
 % This script is intended to be run with the working directory set to the
 % location of the .xls file with the grain size data.
 % all that is required in the directory is this run file
-% and the grain size data. the directory with the inverse model must
-% be added to your matlab path but need not be in the working directory.
+% and the grain size data. the directory with the inverse model and all subfolders
+% must be added to your matlab path but need not be in the working directory.
+%
+% This script brings together all the files needed for to complete a model
+% run. It also allows some model run options to be specified. It writes an
+% output file with model inputs and outputs. It creates some plots of model
+% results.
 %%
 clear all; close all;
 %Save figures?
@@ -64,10 +69,10 @@ matIn.th=(max(SedSize.maxdepth)-min(SedSize.mindepth))/100;
 %added varargin options in V3p6:
 % 'matIn'            structure to read in phi,wt,thickness
 % 'h'                flow depth
-% 'zotot'
-% 'mannings'
+% 'zotot'            specify a total bed roughness parameter
+% 'mannings'         specify a mannings n component of bed roughness (model will calculate total
 % 'th'               thickness (will not work for distribution comparison)
-% 'eddyViscShape' *** if 4, then eddie viscosity shape defined by newk
+% 'eddyViscShape'   
 % function
 % 'rhow'
 
@@ -76,17 +81,30 @@ param=[0.02 0.03 0.04];
 
 % open file to write output
 out_file_name = ['Inv-V3p7_results_',SedSize.Tname,'_',num2str(Drange(1)),...
-                '-',num2str(Drange(2)),'cm_','RMSerror.csv'];
+                '-',num2str(Drange(2)),'cm_','model_output.csv'];
 out_file_path = fullfile(pwd, out_file_name);
-fid=fopen(out_file_path,'a');
-     fprintf(fid,'%s\n',[datestr(now),' --- ', inv_model_name]);
-     fprintf(fid,'%s %5.2f %5.2f\n','Phi Range is ',PHIrange);
+
+if exist(out_file_path)
+    fid=fopen(out_file_path,'a');
+else
+    fid = fopen(out_file_path, 'w');
+    fprintf(fid, repmat('%s,', 1, 27), 'trench_id', 'min_depth_cm', 'max_depth_cm',...
+            'param', 'model_name', 'date_time', 'run_time', 'iterations',...
+            'description', 'phi_min', 'phi_max', 'deposit_thickness_m',...
+            'flow_depth_m', 'N_size_classes', 'mean_grain_diameter_m',...
+            'eddy_viscosity_profile', 'ustarc_mps', 'zo_tot', 'thload_m',...
+            'predict_ss_load_m', 'max_speed_mps', 'avg_speed_mps', 'max_froude',...
+            'avg_froude', 'interval', 'total_intervals', 'rms_error');
+    fprintf(fid,'\n');
+end
+% format string for writing csv file
+f_str='%s,%4.2f,%4.2f,%4.3f,%s,%s,%4.2f,%i,%s,%4.2f,%4.2f,%4.3f,%4.2f,%i,%.3e,%s,%4.2f,%.3e,%4.3f,%4.3f,%5.2f,%5.2f,%4.2f,%4.2f,%i,%i,%4.2f,\n';
      
 % loop through param values, running model with each value
 for i=1:length(param)
      
     [modelOUT(i)]=Tsunami_InvVelModel_V3p7MB...
-        ('infile',inv_modelP_file,'grading',0.01,'matIn',matIn,'mannings',param(i),'h',0.5,'sname',sname,'eddyViscShape',3);
+        ('infile',inv_modelP_file,'grading',0.01,'matIn',matIn,'zotot',param(i),'h',0.5,'sname',sname,'eddyViscShape',3);
     
     AvgSpeed(i,1)=modelOUT(i).results.AvgSpeed;
     AvgFroude(i,1)=modelOUT(i).results.AvgFroude;
@@ -98,15 +116,34 @@ for i=1:length(param)
         RmsError(i,j)=sqrt(sum(((FlipSedWt(:,j))'-modelOUT(i).gradOut.wpc(j,:)).^2))/numel(modelOUT(i).gradOut.wpc(j,:));
 
         % write out the RMS errors
-        fprintf(fid,'%s %4.2f %s %i %s %4.2f \n','RMS error for ',param(i), 'interval', j, ' : ', RmsError(i,j));
         fprintf(1,'%s %4.2f %s %i %s %4.2f \n','RMS error for ',param(i), 'interval', j, ' : ', RmsError(i,j))
 
     end
     MeanRmsError(i)=mean(RmsError(i,:));
-    fprintf(fid,'%s %4.2f %s %4.2f \n','RMS error for ',param(i), 'for the entire layer is ',MeanRmsError(i));
     fprintf(1,'%s %4.2f %s %4.2f \n','RMS error for ',param(i), 'for the entire layer is ',MeanRmsError(i))
     fprintf(1,'%s %5.2f %5.2f\n','Phi Range is ',PHIrange);
-     
+    
+    n_intervals = length(modelOUT(1).gradOut.midint);
+    % write an output file, with one entry for each calculated RMS error
+    for jj=0:n_intervals;
+        if jj == 0
+            rms = MeanRmsError(i);
+        else
+            rms = RmsError(i, jj);
+        end
+        fprintf(fid, f_str, SedSize.Tname, Drange(1), Drange(2), param(i),...
+                inv_model_name, modelOUT(i).details.timestamp,...
+                modelOUT(i).details.elapsed_time, modelOUT(i).details.iterations,...
+                char(modelOUT(i).siteInfo.description), PHIrange(1), PHIrange(2),...
+                modelOUT(i).siteInfo.depositThickness, modelOUT(i).siteInfo.depth,...
+                modelOUT(i).details.n_sedsize_class, modelOUT(i).details.mean_grain_diameter_m,...
+                modelOUT(i).details.eddy_viscosity_profile, modelOUT(i).results.ustrc,...
+                modelOUT(i).results.zotot, modelOUT(i).results.thload,...
+                modelOUT(i).results.predicted_ss_load, modelOUT(i).results.MaxSpeed,...
+                modelOUT(i).results.AvgSpeed, modelOUT(i).results.MaxFroude,...
+                modelOUT(i).results.AvgFroude, jj, n_intervals, rms);
+    end
+    
     close;  % closes Tsunami_InvVelModel_V3p6 figures  get rid of close if you want those figures
     
 end
@@ -140,8 +177,8 @@ set(gcf, 'PaperPositionMode', 'manual','PaperUnits','inches','units','inches',..
 % to change file type to editable in illustrator change '-djpeg' to
 % '-depsc' or '-dill'
 if Save.ALL==1
-    print('-r300','-djpeg',['Results_',...
-        char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf'])
+    print('-r300','-djpeg', fullfile(fpath, ['Results_',...
+        char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf']))
 end
 %% Stack plot: Distribution
 %close all;clc; Mark closes all figures and clear the command line for
@@ -184,8 +221,8 @@ if length(SedSize.Sample_ID)>1
 
     if Save.ALL==1
         %print('-r200','-djpeg',['Stack_',...
-            print('-r600','-dill',['Stack_',...
-            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf'])
+            print('-r600','-depsc', fullfile(fpath, ['Stack_',...
+            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf']))
     end
 end
 %%
@@ -222,8 +259,8 @@ if ObsDist==1
         'position',[1 1 8 10], 'PaperPosition', [1 1 4 5])
 
     if Save.ALL==1
-        print('-r600','-dill',['Observed_Dists_',...
-            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf'])
+        print('-r600','-depsc', fullfile(fpath, ['Observed_Dists_',...
+            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf']))
     end
 end
 
@@ -245,8 +282,8 @@ if ModDist==1
         'position',[1 1 8 10], 'PaperPosition', [1 1 4 5])
 
     if Save.ALL==1
-        print('-r600','-dill',['Modeled_Dists_',...
-            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf'])
+        print('-r600','-depsc', fullfile(fpath, ['Modeled_Dists_',...
+            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf']))
     end
 end
 
@@ -266,7 +303,7 @@ if LayerForm==1
         'position',[1 1 8 10], 'PaperPosition', [1 1 4 5])
 
     if Save.ALL==1
-        print('-r600','-dill',['Layer-Formation_',...
-            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf'])
+        print('-r600','-depsc', fullfile(fpath, ['Layer-Formation_',...
+            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf']))
     end
 end
