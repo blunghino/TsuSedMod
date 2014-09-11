@@ -1,0 +1,1 @@
+function mm = phi2mm(phi)% phi2mm.m - quick program that converts phi to mm.%% Bruce Jaffe, UGSS, written 3/15/01%% function mm = phi2mm(phi)%% BEJ 3/15/01mm=2.^-phi;

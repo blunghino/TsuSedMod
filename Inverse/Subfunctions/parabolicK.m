@@ -1,0 +1,1 @@
+function K=parabolicK(z,h,ustrc)% parabolicK.m- a function that calculates the parabolic eddy viscosity profile%%function K=parabolicK(z,h,ustrc)%% 	Input: 	z- vector with elevations (m) where the eddy viscosity is calculated%   		h- water depth (m)%			ustrc- current shear velocity (m/s)%% Bruce Jaffe, USGS% March 12, 2001vk = 0.41;K = vk*z.*(1-z./h).*ustrc;

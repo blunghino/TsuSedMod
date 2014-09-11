@@ -1,0 +1,1 @@
+function K=newK(z,h,ustrc)% mbK.m- a function that calculates the linear eddy viscosity profile%%function K=mbK(z,h,ustrc)%% 	Input: 	z- vector with elevations (m) where the eddy viscosity is calculated%   		h- water depth (m)%			ustrc- current shear velocity (m/s)%% Bruce Jaffe, USGS% April 3, 2001vk = 0.41;K = vk*z.*ustrc;
