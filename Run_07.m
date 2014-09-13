@@ -1,4 +1,4 @@
-%%
+% brent lunghino updated 9/2014:
 % This script is intended to be run with the working directory set to the
 % location of the .xls file with the grain size data.
 % all that is required in the directory is this run file
@@ -9,18 +9,44 @@
 % run. It also allows some model run options to be specified. It writes an
 % output file with model inputs and outputs. It creates some plots of model
 % results.
-%%
 clear all; close all;
-%Save figures?
-Save.ALL=1;  % put 0 if don't want to save files
-%Save figure path
+
+%% SETTINGS - to be changed by user
+
+%Site data file name, .xls or .csv file IN CURRENT WORKING DIRECTORY
+fname='GS_Japan_Sendai_T3-10.csv'; 
+% Site Name
+sname='T3';
+% Use to look at specific trenchs
+Trench_ID=[{'T3-10'}];
+% Depth range  *** change to look at different intervals of the deposit
+Drange=[0 2];
+% Phi range
+PHIrange=[-1 7];
+% flow depth (m)
+flow_depth = 2;
+% grading (m)       
+% eg .01 if regular 1 cm samples, [.02, .01, .005] for irregular samples
+grading = .01;
+% set which input file reader to use
+%    2 = SED_Size_Reader_02.m
+%    3 = SED_Size_Reader_03.m
+%    0 = uniform_GS_csv_reader.m
+rdr = 0;
+% Save figures? put 0 if don't want to save files
+Save.ALL=1;
+% values to loop through for model runs. the default is to loop over bottom
+% roughness values. To loop over a different model input, you must change 
+% the reference to param where the core model function is called
+param = [0.02 0.03 0.04];
+
+%% SETUP - get paths, input data, output file ready for model runs
+
+% Save figure path
 fpath = fullfile(pwd, 'Figures');
 if ~exist(fpath)
     mkdir(fpath);
 end
-
-%Site data file name
-fname='Japan_Site_Data_interp_T3_Jogan.xls'; %Default .xls file IN CURRENT WORKING DIRECTORY
 
 % path to model run file
 inv_model_name = 'Tsunami_InvVelModel_V3p7MB';
@@ -31,20 +57,6 @@ inv_model_name = 'Tsunami_InvVelModel_V3p7MB';
 % inv_modelP_file = fullfile(pwd,'Name_Of_Non_Default_Model_Params_File.xls');
 inv_modelP_file = fullfile(inv_model_path, 'Tsunami_InvVelModel_Default.xls');
 
-%Site Name
-sname='T3';
-%Use to look at specific trenchs
-Trench_ID=[{'T3-16'}];
-%Depth range  *** change to look at different intervals of the deposit
-Drange=[10 14];
-%Phi range
-PHIrange=[-1 7];
-
-%set which input file reader to use
-%   2 = SED_Size_Reader_02.m
-%   3 = SED_Size_Reader_03.m
-%   0 = uniform_GS_csv_reader.m
-rdr = 2;
 %Run SED_Size_Reader
 if rdr == 2
     [SedSize]=...
@@ -53,16 +65,15 @@ elseif rdr == 3
     [SedSize]=...
         SED_Size_Reader_03('infile',[fname],'Trench_ID',Trench_ID,'Drange',Drange,'PHIrange',PHIrange);
 elseif rdr == 0
-    % not yet implemented
     [SedSize]=...
         uniform_GS_csv_reader('infile',[fname],'Drange',Drange,'PHIrange',PHIrange);        
 end
-%%%
+
 %Take what you need from SED_size_reader
 matIn.phi=SedSize.phi;
 matIn.wt=SedSize.Bulk.wt;
 matIn.th=(max(SedSize.maxdepth)-min(SedSize.mindepth))/100;
-%%
+
 %Set parameter value if you want to loop and run inverse model
 % If value not specified, then goes to defaults in
 % Tsunami_InvVelModel_Default.xls
@@ -76,14 +87,10 @@ matIn.th=(max(SedSize.maxdepth)-min(SedSize.mindepth))/100;
 % function
 % 'rhow'
 
-% values to loop through for model runs
-param=[0.02 0.03 0.04];   
-
 % open file to write output
 out_file_name = ['Inv-V3p7_results_',SedSize.Tname,'_',num2str(Drange(1)),...
                 '-',num2str(Drange(2)),'cm_','model_output.csv'];
 out_file_path = fullfile(pwd, out_file_name);
-
 if exist(out_file_path)
     fid=fopen(out_file_path,'a');
 else
@@ -103,14 +110,16 @@ end
 f_str1='%s,%4.2f,%4.2f,%4.3f,%s,%s,%4.2f,%4.2f,%i,%s,%4.2f,%4.2f,%4.3f,%4.2f,%i,%.3e,%s,%4.2f,%.3e,%4.3f,%4.3f,%5.2f,%5.2f,%4.2f,%4.2f,\n';
 f_str2='%s,%4.2f,%4.2f,%4.3f,%s,%s,%4.2f,,,,,,,,,,,,,,,,,,,\n';
 
-% loop through param values, running model with each value
+%% RUN MODEL - model runs here, and error calculations
+
+% loop through param values, run model with each value
 for i=1:length(param)
     % run model 
     [modelOUT(i)]=Tsunami_InvVelModel_V3p7MB('infile', inv_modelP_file,...
-                                             'grading', 0.01,...
+                                             'grading', grading,...
                                              'matIn', matIn,...
                                              'zotot', param(i),...
-                                             'h', 0.5,...
+                                             'h', flow_depth,...
                                              'sname', sname,...
                                              'eddyViscShape', 3);
     
@@ -160,6 +169,7 @@ for i=1:length(param)
     
 end
 
+% close output file
 fclose(fid);
 
 %% Speed and Froude number plot
