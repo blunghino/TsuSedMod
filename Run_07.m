@@ -14,13 +14,13 @@ clear all; close all;
 %% SETTINGS - to be changed by user
 
 %Site data file name, .xls or .csv file IN CURRENT WORKING DIRECTORY
-fname='GS_Japan_Sendai_T3-10.csv'; 
+fname='GS_Japan_Sendai_T3-16.csv'; 
 % Site Name
 sname='T3';
 % Use to look at specific trenchs
-Trench_ID=[{'T3-10'}];
-% Depth range  *** change to look at different intervals of the deposit
-Drange=[0 2];
+Trench_ID=[{'T3-16'}];
+% Depth range - change to look at different intervals of the deposit
+Drange=[10 14];
 % Phi range
 PHIrange=[-1 7];
 % flow depth (m)
@@ -33,7 +33,7 @@ grading = .01;
 %    3 = SED_Size_Reader_03.m
 %    0 = uniform_GS_csv_reader.m
 rdr = 0;
-% Save figures? put 0 if don't want to save files
+% Save figures? put 0 if don't want to save figures
 Save.ALL=1;
 % values to loop through for model runs. the default is to loop over bottom
 % roughness values. To loop over a different model input, you must change 
@@ -165,8 +165,8 @@ for i=1:length(param)
         
     end
     
-    close;  % closes Tsunami_InvVelModel_V3p6 figures  get rid of close if you want those figures
-    
+    % closes Tsunami_InvVelModel_V3p6 figures  get rid of close if you want those figures
+    close;  
 end
 
 % close output file
