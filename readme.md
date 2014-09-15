@@ -21,4 +21,4 @@ There are many model parameters that can be changed beyond those defined in the 
 5. Spiske, M., Weiss, R., Bahlburg, H., Roskosch, J., & Amijaya, H. (2010). *The TsuSedMod inversion model applied to the deposits of the 2004 Sumatra and 2006 Java tsunami and implications for estimating flow parameters of palaeo-tsunami*. Sedimentary Geology, 224(1), 29-37.
 6. Witter, R. C., Jaffe, B., Zhang, Y., & Priest, G. (2012). *Reconstructing hydrodynamic flow parameters of the 1700 tsunami at Cannon Beach, Oregon, USA*. Natural hazards, 63(1), 223-240.
 
-Contains code by Bruce Jaffe, Guy Gelfenbaum, Chris Sherwood, Andrew Stevens, Mark Buckley, Brent Lunghino, SeanPaul La Selle. Developed at the USGS Pacific Coastal and Marine Science Center.
+Contains code by Bruce Jaffe, Guy Gelfenbaum, Chris Sherwood, Andrew Stevens, Mark Buckley, Brent Lunghino, SeanPaul La Selle. Developed at the [USGS Pacific Coastal and Marine Science Center](http://walrus.wr.usgs.gov/index.html).
