@@ -74,19 +74,6 @@ matIn.phi=SedSize.phi;
 matIn.wt=SedSize.Bulk.wt;
 matIn.th=(max(SedSize.maxdepth)-min(SedSize.mindepth))/100;
 
-%Set parameter value if you want to loop and run inverse model
-% If value not specified, then goes to defaults in
-% Tsunami_InvVelModel_Default.xls
-%added varargin options in V3p6:
-% 'matIn'            structure to read in phi,wt,thickness
-% 'h'                flow depth
-% 'zotot'            specify a total bed roughness parameter
-% 'mannings'         specify a mannings n component of bed roughness (model will calculate total
-% 'th'               thickness (will not work for distribution comparison)
-% 'eddyViscShape'   
-% function
-% 'rhow'
-
 % open file to write output
 out_file_name = ['Inv-V3p7_results_',SedSize.Tname,'_',num2str(Drange(1)),...
                 '-',num2str(Drange(2)),'cm_','model_output.csv'];
@@ -111,6 +98,19 @@ f_str1='%s,%4.2f,%4.2f,%4.3f,%s,%s,%4.2f,%4.2f,%i,%s,%4.2f,%4.2f,%4.3f,%4.2f,%i,
 f_str2='%s,%4.2f,%4.2f,%4.3f,%s,%s,%4.2f,,,,,,,,,,,,,,,,,,,\n';
 
 %% RUN MODEL - model runs here, and error calculations
+
+%Set parameter value if you want to loop and run inverse model
+% If value not specified, then goes to defaults in
+% Tsunami_InvVelModel_Default.xls
+%added varargin options in V3p6:
+% 'matIn'            structure to read in phi,wt,thickness
+% 'h'                flow depth
+% 'zotot'            specify a total bed roughness parameter
+% 'mannings'         specify a mannings n component of bed roughness (model will calculate total
+% 'th'               thickness (will not work for distribution comparison)
+% 'eddyViscShape'   
+% function
+% 'rhow'
 
 % loop through param values, run model with each value
 for i=1:length(param)

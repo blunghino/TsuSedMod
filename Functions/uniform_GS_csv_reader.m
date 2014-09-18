@@ -1,7 +1,8 @@
 function [SedSize,Bulk,TrenchIDs]=uniform_GS_csv_reader(varargin)
 % Read in information from TsuDB Uniform GS Data format 
 % output SedSize structure of relevent information
-% written by brent lunghino 9/2014 based on SedSize_Reader_02.m
+% written by Brent Lunghino, USGS, 9/2014 based on SedSize_Reader_02.m, 
+% uses code from SedSize_Reader_02.m
 %
 % check for infile argument
 if any(strcmpi(varargin,'infile'))==1;
