@@ -1,4 +1,4 @@
-% brent lunghino updated 9/2014:
+% Brent Lunghino updated 9/2014:
 % This script is intended to be run with the working directory set to the
 % location of the .xls file with the grain size data.
 % all that is required in the directory is this run file
@@ -14,7 +14,7 @@ clear all; close all;
 %% SETTINGS - to be changed by user
 
 %Site data file name, .xls or .csv file IN CURRENT WORKING DIRECTORY
-fname='GS_Japan_Sendai_T3-16.csv'; 
+fname='Japan_Site_Data_Interp_T3_Jogan.xls'; 
 % Site Name
 sname='T3';
 % Use to look at specific trenchs
@@ -22,9 +22,9 @@ Trench_ID=[{'T3-16'}];
 % Depth range - change to look at different intervals of the deposit
 Drange=[10 14];
 % Phi range
-PHIrange=[-1 7];
+PHIrange=[0 8];
 % flow depth (m)
-flow_depth = 2;
+flow_depth = 5;
 % grading (m)       
 % eg .01 if regular 1 cm samples, [.02, .01, .005] for irregular samples
 grading = .01;
@@ -32,11 +32,12 @@ grading = .01;
 %    2 = SED_Size_Reader_02.m
 %    3 = SED_Size_Reader_03.m
 %    0 = uniform_GS_csv_reader.m
-rdr = 0;
+rdr = 2;
 % Save figures? put 0 if don't want to save figures
-Save.ALL=1;
-% values to loop through for model runs. the default is to loop over bottom
-% roughness values. To loop over a different model input, you must change 
+Save.ALL=0;
+% values to loop through for model runs. the default is to loop over 
+% mannings n bottom roughness values.
+% To loop over a different model input, you must change 
 % the reference to param where the core model function is called
 param = [0.02 0.03 0.04];
 
@@ -118,7 +119,7 @@ for i=1:length(param)
     [modelOUT(i)]=Tsunami_InvVelModel_V3p7MB('infile', inv_modelP_file,...
                                              'grading', grading,...
                                              'matIn', matIn,...
-                                             'zotot', param(i),...
+                                             'mannings', param(i),...
                                              'h', flow_depth,...
                                              'sname', sname,...
                                              'eddyViscShape', 3);
