@@ -197,7 +197,7 @@ set(gcf, 'PaperPositionMode', 'manual','PaperUnits','inches','units','inches',..
 % '-depsc' or '-dill'
 if Save.ALL==1
     print('-r300','-djpeg', fullfile(fpath, ['Results_',...
-        char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf']))
+        char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf.jpg']))
 end
 %% Stack plot: Distribution
 %close all;clc; Mark closes all figures and clear the command line for
@@ -241,7 +241,7 @@ if length(SedSize.Sample_ID)>1
     if Save.ALL==1
         %print('-r200','-djpeg',['Stack_',...
             print('-r600','-depsc', fullfile(fpath, ['Stack_',...
-            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf']))
+            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf.eps']))
     end
 end
 %%
@@ -279,7 +279,7 @@ if ObsDist==1
 
     if Save.ALL==1
         print('-r600','-depsc', fullfile(fpath, ['Observed_Dists_',...
-            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf']))
+            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf.eps']))
     end
 end
 
@@ -302,7 +302,7 @@ if ModDist==1
 
     if Save.ALL==1
         print('-r600','-depsc', fullfile(fpath, ['Modeled_Dists_',...
-            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf']))
+            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf.eps']))
     end
 end
 
@@ -323,6 +323,6 @@ if LayerForm==1
 
     if Save.ALL==1
         print('-r600','-depsc', fullfile(fpath, ['Layer-Formation_',...
-            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf']))
+            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf.eps']))
     end
 end
