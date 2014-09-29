@@ -43,12 +43,16 @@ param = [0.02 0.03 0.04];
 
 %% SETUP - get paths, input data, output file ready for model runs
 
-% Save figure path
-fpath = fullfile(pwd, 'Figures');
+% Save figure folder
+fpath = fullfile(pwd, 'figures');
 if ~exist(fpath)
     mkdir(fpath);
 end
-
+% Save mat folder
+mpath = fullfile(pwd, 'mat_outputs');
+if ~exist(mpath)
+    mkdir(mpath);
+end
 % path to model run file
 inv_model_name = 'Tsunami_InvVelModel_V3p7MB';
 [inv_model_path, ~, ~] = fileparts(which(inv_model_name));
@@ -85,9 +89,9 @@ else
     % if output file for this deposit interval doesn't already exist, write
     % a new output file with headers
     fid = fopen(out_file_path, 'w');
-    fprintf(fid, repmat('%s,', 1, 27), 'trench_id', 'min_depth_cm', 'max_depth_cm',...
+    fprintf(fid, repmat('%s,', 1, 24), 'trench_id', 'min_depth_cm', 'max_depth_cm',...
             'param', 'model_name', 'date_time', 'rms_error', 'run_time', 'iterations',...
-            'description', 'phi_min', 'phi_max', 'deposit_thickness_m',...
+             'phi_min', 'phi_max', 'deposit_thickness_m',...
             'flow_depth_m', 'N_size_classes', 'mean_grain_diameter_m',...
             'eddy_viscosity_profile', 'ustarc_mps', 'zo_tot', 'thload_m',...
             'predict_ss_load_m', 'max_speed_mps', 'avg_speed_mps', 'max_froude',...
@@ -95,8 +99,8 @@ else
     fprintf(fid,'\n');
 end
 % format strings for writing csv file
-f_str1='%s,%4.2f,%4.2f,%4.3f,%s,%s,%4.2f,%4.2f,%i,%s,%4.2f,%4.2f,%4.3f,%4.2f,%i,%.3e,%s,%4.2f,%.3e,%4.3f,%4.3f,%5.2f,%5.2f,%4.2f,%4.2f,\n';
-f_str2='%s,%4.2f,%4.2f,%4.3f,%s,%s,%4.2f,,,,,,,,,,,,,,,,,,,\n';
+f_str1='%s,%4.2f,%4.2f,%4.3f,%s,%s,%4.2f,%4.2f,%i,%4.2f,%4.2f,%4.3f,%4.2f,%i,%.3e,%s,%4.2f,%.3e,%4.3f,%4.3f,%5.2f,%5.2f,%4.2f,%4.2f,\n';
+f_str2='%s,%4.2f,%4.2f,%4.3f,%s,%s,%4.2f,,,,,,,,,,,,,,,,,,\n';
 
 %% RUN MODEL - model runs here, and error calculations
 
@@ -127,29 +131,34 @@ for i=1:length(param)
     AvgSpeed(i,1)=modelOUT(i).results.AvgSpeed;
     AvgFroude(i,1)=modelOUT(i).results.AvgFroude;
     
-    %     Calculate RMS error between modeled and observed distributions for each 1-cm (or other) interval in suspension graded layer
-    %     calculated for only the 1st model parameter
-    FlipSedWt=fliplr(SedSize.wt)*100;  %flip so order of levels in observed and modeled wts match
-    for j=1:length(modelOUT(1).gradOut.midint);
-        RmsError(i,j)=sqrt(sum(((FlipSedWt(:,j))'-modelOUT(i).gradOut.wpc(j,:)).^2))/numel(modelOUT(i).gradOut.wpc(j,:));
+    % calculate root square error between modeled and observed grain size
+    % distribution for each sub-interval
+    n_intervals = length(modelOUT(1).gradOut.midint);
+    root_square_error = zeros(length(param), n_intervals);
+    %flip so order of levels in observed and modeled wts match
+    FlipSedWt=fliplr(SedSize.wt)*100;  
+    for j=1:n_intervals;
+        root_square_error(i,j)=sqrt(sum(((FlipSedWt(:,j))'-modelOUT(i).gradOut.wpc(j,:)).^2));
 
-        % write out the RMS errors
-        fprintf(1,'%s %4.2f %s %i %s %4.2f \n','RMS error for ',param(i), 'interval', j, ' : ', RmsError(i,j))
+        % write out the RSE
+        fprintf(1,'%s %4.2f %s %i %s %4.2f \n','RSE for ',param(i),...
+                'interval', j, ' : ', root_square_error(i,j))
 
     end
-    MeanRmsError(i)=mean(RmsError(i,:));
-    fprintf(1,'%s %4.2f %s %4.2f \n','RMS error for ',param(i), 'for the entire layer is ',MeanRmsError(i))
+    % calculate mean RSE
+    mean_RSE(i) = mean(root_square_error(i,:));
+    fprintf(1,'%s %4.2f %s %4.2f \n','RSE for ',param(i),...
+            'for the entire layer is ', mean_RSE(i))
     fprintf(1,'%s %5.2f %5.2f\n','Phi Range is ',PHIrange);
    
     % write an output file, with one entry for each calculated RMS error
-    n_intervals = length(modelOUT(1).gradOut.midint);
     for jj=0:n_intervals;
         if jj == 0
-            rms = MeanRmsError(i);
+            % full interval results
             fprintf(fid, f_str1, SedSize.Tname, Drange(1), Drange(2), param(i),...
-                inv_model_name, modelOUT(i).details.timestamp, rms,...
+                inv_model_name, modelOUT(i).details.timestamp, mean_RSE(i),...
                 modelOUT(i).details.elapsed_time, modelOUT(i).details.iterations,...
-                char(modelOUT(i).siteInfo.description), PHIrange(1), PHIrange(2),...
+                PHIrange(1), PHIrange(2),...
                 modelOUT(i).siteInfo.depositThickness, modelOUT(i).siteInfo.depth,...
                 modelOUT(i).details.n_sedsize_class, modelOUT(i).details.mean_grain_diameter_m,...
                 modelOUT(i).details.eddy_viscosity_profile, modelOUT(i).results.ustrc,...
@@ -158,20 +167,25 @@ for i=1:length(param)
                 modelOUT(i).results.AvgSpeed, modelOUT(i).results.MaxFroude,...
                 modelOUT(i).results.AvgFroude);
         else
-            rms = RmsError(i, jj);
+            % abridged results for sub-interval (individual samples)
             fprintf(fid, f_str2, SedSize.Tname, SedSize.mindepth(jj),...
                     SedSize.maxdepth(jj), param(i), inv_model_name,...
-                    modelOUT(i).details.timestamp, rms);
+                    modelOUT(i).details.timestamp, root_square_error(i, jj));
         end
         
     end
     
-    % closes Tsunami_InvVelModel_V3p6 figures  get rid of close if you want those figures
+    % closes Tsunami_InvVelModel_V3p6 figures, get rid of close if you want those figures
     close;  
 end
 
 % close output file
 fclose(fid);
+
+% save model output structure as a .mat file
+mat_name=strcat('Inv-V3p7_results_',SedSize.Tname,'_',num2str(Drange(1)),...
+                '-',num2str(Drange(2)),'cm_',datestr(now, 30),'.mat');
+save(fullfile(mpath, mat_name), 'modelOUT')
 
 %% Speed and Froude number plot
 %close all;clc; Mark closes all figures and clear the command line for
