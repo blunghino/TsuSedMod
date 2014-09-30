@@ -45,7 +45,7 @@ param = [0.02 0.03 0.04];
 
 % Save figure folder
 fpath = fullfile(pwd, 'figures');
-if ~exist(fpath)
+if ~exist(fpath) && Save.ALL == 1
     mkdir(fpath);
 end
 % Save mat folder
@@ -78,6 +78,9 @@ end
 matIn.phi=SedSize.phi;
 matIn.wt=SedSize.Bulk.wt;
 matIn.th=(max(SedSize.maxdepth)-min(SedSize.mindepth))/100;
+matIn.Trench_ID = Trench_ID;
+matIn.Drange = Drange;
+matIn.PHIrange = PHIrange;
 
 % open file to write output
 out_file_name = ['Inv-V3p7_results_',SedSize.Tname,'_',num2str(Drange(1)),...
@@ -89,13 +92,14 @@ else
     % if output file for this deposit interval doesn't already exist, write
     % a new output file with headers
     fid = fopen(out_file_path, 'w');
-    fprintf(fid, repmat('%s,', 1, 24), 'trench_id', 'min_depth_cm', 'max_depth_cm',...
-            'param', 'model_name', 'date_time', 'rms_error', 'run_time', 'iterations',...
-             'phi_min', 'phi_max', 'deposit_thickness_m',...
+    fprintf(fid, repmat('%s,', 1, 24), 'trench_id', 'min_depth_cm',...
+            'max_depth_cm', 'param', 'model_name', 'date_time',...
+            'root_square_error', 'run_time', 'iterations',...
+            'phi_min', 'phi_max', 'deposit_thickness_m',...
             'flow_depth_m', 'N_size_classes', 'mean_grain_diameter_m',...
             'eddy_viscosity_profile', 'ustarc_mps', 'zo_tot', 'thload_m',...
-            'predict_ss_load_m', 'max_speed_mps', 'avg_speed_mps', 'max_froude',...
-            'avg_froude');
+            'predict_ss_load_m', 'max_speed_mps', 'avg_speed_mps',...
+            'max_froude', 'avg_froude');
     fprintf(fid,'\n');
 end
 % format strings for writing csv file
@@ -185,7 +189,7 @@ fclose(fid);
 % save model output structure as a .mat file
 mat_name=strcat('Inv-V3p7_results_',SedSize.Tname,'_',num2str(Drange(1)),...
                 '-',num2str(Drange(2)),'cm_',datestr(now, 30),'.mat');
-save(fullfile(mpath, mat_name), 'modelOUT')
+save(fullfile(mpath, mat_name), 'modelOUT', 'root_square_error', 'param')
 
 %% Speed and Froude number plot
 %close all;clc; Mark closes all figures and clear the command line for
