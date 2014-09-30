@@ -1,5 +1,8 @@
 close all
+% do you have the suplabel function (available online)
+have_suplabel=1;
 scrsz = get(0,'ScreenSize');
+%% figure showing U*c and ss load off vs N iterations
 figure('Position',[scrsz(3)/4 scrsz(4)/4 scrsz(3)/2.25 scrsz(4)/1.75]);
 ax1 = subplot(2,1,1);
 hold on
@@ -15,7 +18,14 @@ end
 info = modelOUT(1).siteInfo.matIn;
 suptitle = char(strcat(info.Trench_ID(1), ', ', num2str(info.Drange(1)),...
                 '-', num2str(info.Drange(2)), 'cm'));
-suplabel(suptitle, 't');
+% check that suplabel function is available
+if have_suplabel==1
+    try
+        suplabel(suptitle, 't');
+    catch err
+        have_suplabel = 0;
+    end
+end
 labels = cellfun(@num2str, num2cell(param), 'UniformOutput', 0);
 axes(ax1);
 legend(h1, labels);
@@ -23,35 +33,46 @@ title('how far total suspended load is off from load required to create deposit'
 ylabel('offa');
 axes(ax2);
 legend(h2, labels);
-title('U * C');
+title('U*c');
 ylabel('ustrca ');
 xlabel('N iterations');
 shg;
-for jj=1:2;
+%% figures: ss concentration, bed concentration, ss deviation from desired
+% 1 figure made per loop
+for jj=1:3;
     figure('Position',[scrsz(3)/4 scrsz(4)/4 scrsz(3)/2.25 scrsz(4)/1.75]);
     ax1 = subplot(3,1,1);
     ax2 = subplot(3,1,2);
     ax3 = subplot(3,1,3);
+    % 1 axes plotted per loop
     for ii=1:length(modelOUT);
+        % set which axis to work on
         eval(['axes(ax',num2str(ii),');']);
         hold on
-        if jj==1
+        % set which parameter to plot
+        if jj == 1
             C = modelOUT(ii).details.ssfra';
             C_label = 'ss concentration';
-        elseif jj==2
+        elseif jj == 2
             C = modelOUT(ii).details.fra';
             C_label = 'bed concentration';
+        elseif jj == 3
+            C = modelOUT(ii).details.ssoffa';
+            C_label = 'ss deviation from desired';
         end
         N = length(C(1,:));
-        p = pcolor(linspace(1, N, N), modelOUT(ii).datain.phi', C);
-        shading flat
+        p = pcolor(linspace(1, N, N), modelOUT(ii).datain.phi, C);
+        shading interp
         cbar = colorbar;
         cbar_title = get(cbar, 'Title');
         set(cbar_title, 'String', C_label);
         title(['Mannings n = ', labels(ii)]);
         ylabel('phi'); 
+        xlim([0,10]);
     end
     xlabel('N iterations')
-    suplabel(suptitle, 't');
+    if have_suplabel == 1
+        suplabel(suptitle, 't');
+    end
     shg;
 end
