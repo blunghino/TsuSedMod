@@ -138,7 +138,6 @@ for i=1:length(param)
     % calculate root square error between modeled and observed grain size
     % distribution for each sub-interval
     n_intervals = length(modelOUT(1).gradOut.midint);
-    root_square_error = zeros(length(param), n_intervals);
     %flip so order of levels in observed and modeled wts match
     FlipSedWt=fliplr(SedSize.wt)*100;  
     for j=1:n_intervals;

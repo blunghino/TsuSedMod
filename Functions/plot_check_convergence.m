@@ -40,7 +40,7 @@ shg;
 %% figures: ss concentration, bed concentration, ss deviation from desired
 % 1 figure made per loop
 for jj=1:3;
-    figure('Position',[scrsz(3)/4 scrsz(4)/4 scrsz(3)/2.25 scrsz(4)/1.75]);
+    figure('Position',[scrsz(3)/4 scrsz(4)/4 scrsz(3)/2.25 scrsz(4)/1.65]);
     ax1 = subplot(3,1,1);
     ax2 = subplot(3,1,2);
     ax3 = subplot(3,1,3);
@@ -68,7 +68,10 @@ for jj=1:3;
         set(cbar_title, 'String', C_label);
         title(['Mannings n = ', labels(ii)]);
         ylabel('phi'); 
-        xlim([0,10]);
+        try
+            xlim([0, plot_check_convergence_x_zoom]);
+        catch
+        end
     end
     xlabel('N iterations')
     if have_suplabel == 1
