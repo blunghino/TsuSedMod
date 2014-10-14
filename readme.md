@@ -14,11 +14,11 @@ There are many model parameters that can be changed beyond those defined in the 
 
 ###Publications featuring TsuSedMod###
 
-1. Jaffe, B. E., & Gelfenbuam, G. (2007). *A simple model for calculating tsunami flow speed from tsunami deposits*. Sedimentary Geology, 200(3), 347-361.
-2. Jaffe, B. E., Morton, R. A., Kortekaas, S., Dawson, A. G., Smith, D. E., Gelfenbaum, G., ... & Shi, S. (2008). *Reply to Discussion of articles in “Sedimentary features of tsunami deposits”*. Sedimentary Geology, 211(3), 95-97.
-3. Jaffe, B., Buckley, M., Richmond, B., Strotz, L., Etienne, S., Clark, K., ... & Goff, J. (2011). *Flow speed estimated by inverse modeling of sandy sediment deposited by the 29 September 2009 tsunami near Satitoa, east Upolu, Samoa*. Earth-Science Reviews, 107(1), 23-37.
-4. Jaffe, B. E., Goto, K., Sugawara, D., Richmond, B. M., Fujino, S., & Nishimura, Y. (2012). *Flow speed estimated by inverse modeling of sandy tsunami deposits: results from the 11 March 2011 tsunami on the coastal plain near the Sendai Airport, Honshu, Japan*. Sedimentary Geology, 282, 90-109.
-5. Spiske, M., Weiss, R., Bahlburg, H., Roskosch, J., & Amijaya, H. (2010). *The TsuSedMod inversion model applied to the deposits of the 2004 Sumatra and 2006 Java tsunami and implications for estimating flow parameters of palaeo-tsunami*. Sedimentary Geology, 224(1), 29-37.
-6. Witter, R. C., Jaffe, B., Zhang, Y., & Priest, G. (2012). *Reconstructing hydrodynamic flow parameters of the 1700 tsunami at Cannon Beach, Oregon, USA*. Natural hazards, 63(1), 223-240.
+1. Jaffe, B. E., & Gelfenbuam, G. (2007). A simple model for calculating tsunami flow speed from tsunami deposits. *Sedimentary Geology*, 200(3), 347-361.
+2. Jaffe, B. E., Morton, R. A., Kortekaas, S., Dawson, A. G., Smith, D. E., Gelfenbaum, G., ... & Shi, S. (2008). Reply to Discussion of articles in “Sedimentary features of tsunami deposits”. *Sedimentary Geology*, 211(3), 95-97.
+3. Jaffe, B., Buckley, M., Richmond, B., Strotz, L., Etienne, S., Clark, K., ... & Goff, J. (2011). Flow speed estimated by inverse modeling of sandy sediment deposited by the 29 September 2009 tsunami near Satitoa, east Upolu, Samoa. *Earth-Science Reviews*, 107(1), 23-37.
+4. Jaffe, B. E., Goto, K., Sugawara, D., Richmond, B. M., Fujino, S., & Nishimura, Y. (2012). Flow speed estimated by inverse modeling of sandy tsunami deposits: results from the 11 March 2011 tsunami on the coastal plain near the Sendai Airport, Honshu, Japan. *Sedimentary Geology*, 282, 90-109.
+5. Spiske, M., Weiss, R., Bahlburg, H., Roskosch, J., & Amijaya, H. (2010). The TsuSedMod inversion model applied to the deposits of the 2004 Sumatra and 2006 Java tsunami and implications for estimating flow parameters of palaeo-tsunami. *Sedimentary Geology*, 224(1), 29-37.
+6. Witter, R. C., Jaffe, B., Zhang, Y., & Priest, G. (2012). Reconstructing hydrodynamic flow parameters of the 1700 tsunami at Cannon Beach, Oregon, USA. *Natural Hazards*, 63(1), 223-240.
 
 Contains code by Bruce Jaffe, Guy Gelfenbaum, Chris Sherwood, Andrew Stevens, Mark Buckley, Brent Lunghino, SeanPaul La Selle. Developed at the [USGS Pacific Coastal and Marine Science Center](http://walrus.wr.usgs.gov/index.html).
