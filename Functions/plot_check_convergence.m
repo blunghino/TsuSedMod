@@ -28,10 +28,12 @@ if have_suplabel==1
 end
 labels = cellfun(@num2str, num2cell(param), 'UniformOutput', 0);
 axes(ax1);
+ylim([-10 100])
 legend(h1, labels);
 title('how far total suspended load is off from load required to create deposit');
 ylabel('offa');
 axes(ax2);
+ylim([-1 1])
 legend(h2, labels);
 title('U*c');
 ylabel('ustrca ');

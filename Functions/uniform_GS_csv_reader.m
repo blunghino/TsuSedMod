@@ -37,6 +37,9 @@ if ~isempty(n_cols)
 else
     n_cols = length(C(12,:));
 end
+if length(n_cols) > 1
+    n_cols = n_cols(1);
+end
 [n_rows, ~] = size(C);
 
 % extract data from cell array into structure
@@ -64,10 +67,10 @@ gs.mid_depth = (gs.min_depth+gs.max_depth) / 2;
 TrenchIDs(:,1) = unique(gs.trench_name); 
 
 % get phi bins
-if gs.bin_units ~= 'phi'
+if ~strcmp(gs.bin_units, 'phi') && ~strcmp(gs.bin_units, 'phi mid');
     % insert code here to convert gs.bins from whatever units they
     % are originally in to phi units
-    errordlg([fname, 'Grain size bin units must be in phi to use in inverse model']);
+    errordlg([fname, ' Grain size bin units must be in phi to use in inverse model']);
 else
     gs.phi = gs.bins;
 end
