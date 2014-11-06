@@ -26,7 +26,7 @@ PHIrange=[0 8];
 % flow depth (m)
 flow_depth = 5;
 % grading (m)       
-% eg .01 if regular 1 cm samples, [.02, .01, .005] for irregular samples
+% eg .01 if regular 1 cm samples
 grading = .01;
 % set which input file reader to use
 %    2 = SED_Size_Reader_02.m
