@@ -67,10 +67,12 @@ gs.mid_depth = (gs.min_depth+gs.max_depth) / 2;
 TrenchIDs(:,1) = unique(gs.trench_name); 
 
 % get phi bins
-if ~strcmp(gs.bin_units, 'phi') && ~strcmp(gs.bin_units, 'phi mid');
-    % insert code here to convert gs.bins from whatever units they
-    % are originally in to phi units
+if ~strcmp(gs.bin_units, 'phi') && ~strcmp(gs.bin_units, 'phi mid') && ~strcmp(gs.bin_units, 'mm');
+    % bin units are not phi or mm
     errordlg([fname, ' Grain size bin units must be in phi to use in inverse model']);
+elseif strcmp(gs.bin_units, 'mm');
+    % bin units are in mm, convert to phi
+    gs.phi = -log2(gs.bins);
 else
     gs.phi = gs.bins;
 end
