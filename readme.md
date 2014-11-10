@@ -12,6 +12,10 @@ To work with TsuSedMod, save a version of the **run file** in the directory you 
 
 There are many model parameters that can be changed beyond those defined in the *SETTINGS* section of the **run file**. Some are defined in an excel file in the *Inverse* directory: `Tsunami_InvVelModel_Default.xls`. Others can be passed as arguments to the **model function**, which is located in the *Inverse* directory: `Tsunami_InvVelModel_V3p7MB.m`. These are partially discussed in the *RUN MODEL* section of the **run file** and are further discussed in the function documentation of the **model function**. Running `help Tsunami_InvVelModel_V3p7MB` should display information on advanced parameters. Any parameter values passed as arguments to the **model function** will override values set in `Tsunami_InvVelModel_Default.xls`.
 
+###Model Output###
+
+In the default **run file** several model outputs files are automatically saved. A .csv file in the working directory will save some model input and output values. A unique .csv file will be created for each depth interval and trench run. Multiple model runs on the same depth interval and trench will be appended to the existing .csv file. In the *mat_outputs* subdirectory of the working directory (automatically created if it doesn't already exist), the model will save .mat files with all model data for every model run. In the *figures* subdirectory in the working directory (automatically created if it doesn't already exist), the model will save figures created by the model **run file**. By default new model runs will overwrite old versions of figures for the same depth interval and trench. Figure saving can be turned off in the *SETTINGS* section of the **run file** by setting `Save.ALL = 0`.
+
 ###Publications featuring TsuSedMod###
 
 1. Jaffe, B. E., & Gelfenbuam, G. (2007). A simple model for calculating tsunami flow speed from tsunami deposits. *Sedimentary Geology*, 200(3), 347-361.
