@@ -43,7 +43,6 @@ mpt1=phi(1)+0.5*(phi(1)-phi(2));
 phimdpt=[mpt1;phi(2:length(phi))+0.5*(phi(1:length(phi)-1)-phi(2:length(phi)))];
 phimdpt=phimdpt';
 
-
 % calculate the 1st moment (mean grain size)
 m1=sum(phimdpt.*weight)/sum(weight);
 
