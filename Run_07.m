@@ -104,8 +104,8 @@ else
     fprintf(fid,'\n');
 end
 % format strings for writing csv file
-f_str1='%s,%4.2f,%4.2f,%4.3f,%s,%s,%4.2f,%4.2f,%i,%4.2f,%4.2f,%4.3f,%4.2f,%i,%.3e,%s,%4.2f,%.3e,%4.3f,%4.3f,%5.2f,%5.2f,%4.2f,%4.2f,%.3e,%.3e,\n';
-f_str2='%s,%4.2f,%4.2f,%4.3f,%s,%s,%4.2f,,,,,,,,,,,,,,,,,,,,\n';
+f_str1='%s,%4.2f,%4.2f,%.3e,%s,%s,%4.2f,%4.2f,%i,%4.2f,%4.2f,%4.3f,%4.2f,%i,%.3e,%s,%4.2f,%.3e,%4.3f,%4.3f,%5.2f,%5.2f,%4.2f,%4.2f,%.3e,%.3e,\n';
+f_str2='%s,%4.2f,%4.2f,%.3e,%s,%s,%4.2f,,,,,,,,,,,,,,,,,,,,\n';
 
 %% RUN MODEL - model runs here, and error calculations
 
