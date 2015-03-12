@@ -52,20 +52,28 @@ gs.whosgs = char(C(6,2));
 gs.depth_units = char(C(8,2));
 gs.bin_units = char(C(9,2));
 gs.distribution_units = char(C(10,2));
-gs.layer_type = cellfun(@str2num, C(11,2:n_cols));
-gs.layer = cellfun(@str2num, C(12,2:n_cols));
-gs.trench_name = C(13,2:n_cols);
-gs.sample_id = C(14,2:n_cols);
+% start getting sampling interval data
 gs.min_depth = cellfun(@str2num, C(15,2:n_cols));
+% sort on min_depth and get indices to use to sort all other vectors
+[gs.min_depth, ind] = sort(gs.min_depth);
+gs.layer_type = cellfun(@str2num, C(11,2:n_cols));
+gs.layer_type = gs.layer_type(ind);
+gs.layer = cellfun(@str2num, C(12,2:n_cols));
+gs.layer = gs.layer(ind);
+gs.trench_name = C(13,2:n_cols);
+gs.trench_name = gs.trench_name(ind);
+gs.sample_id = C(14,2:n_cols);
+gs.sample_id = gs.sample_id(ind);
 gs.max_depth = cellfun(@str2num, C(16,2:n_cols));
+gs.max_depth = gs.max_depth(ind);
 gs.bins = cellfun(@str2num, C(18:end, 1));
 gs.data = ones(n_rows-18,n_cols-1);
 for ii=18:n_rows;
     gs.data(ii-17,:) = cellfun(@str2num, C(ii,2:n_cols));
 end
+gs.data = gs.data(:,ind);
 gs.mid_depth = (gs.min_depth+gs.max_depth) / 2;
 TrenchIDs(:,1) = unique(gs.trench_name); 
-
 % get phi bins
 if ~strcmp(gs.bin_units, 'phi') && ~strcmp(gs.bin_units, 'phi mid') && ~strcmp(gs.bin_units, 'mm');
     % bin units are not phi or mm
