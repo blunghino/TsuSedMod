@@ -1,4 +1,5 @@
-% Brent Lunghino updated 9/2014:
+% Brent Lunghino updated 9/2014. 
+% BL updated again on 4/29/2015 (moved many things into subfunctions)
 %
 % 4/29/15 BL fixed csv output file issue (RSE values correct but in
 % wrong order) see issue #5 on github
@@ -10,9 +11,9 @@
 % must be added to your matlab path but need not be in the working directory.
 %
 % This script brings together all the files needed for to complete a model
-% run. It also allows some model run options to be specified. It writes an
-% output file with model inputs and outputs. It creates some plots of model
-% results.
+% run. It also allows some model run options to be specified. It calls scripts 
+% write an output file with model inputs and outputs. It calls scripts to 
+% creates some plots of model results.
 clear all; close all;
 
 %% SETTINGS - to be changed by user
@@ -37,26 +38,41 @@ grading = .01;
 %    3 = SED_Size_Reader_03.m
 %    0 = uniform_GS_csv_reader.m
 rdr = 2;
-% Save figures? put 0 if don't want to save figures
-Save.ALL=0;
 % values to loop through for model runs. the default is to loop over 
 % mannings n bottom roughness values.
 % To loop over a different model input, you must change 
 % the reference to param where the core model function is called
 param = [0.02 0.03 0.04];
 
-%% SETUP - get paths, input data, output file ready for model runs
+%% OUTPUT SETTINGS
+% settings for plots and output files
 
-% Save figure folder
-fpath = fullfile(pwd, 'figures');
-if ~exist(fpath) && Save.ALL == 1
-    mkdir(fpath);
-end
-% Save mat folder
-mpath = fullfile(pwd, 'mat_outputs');
-if ~exist(mpath)
-    mkdir(mpath);
-end
+% Save figures? put 0 if don't want to save figures
+Save.ALL=0;
+% write csv output file
+WriteCSV = 1;
+% save model output structure as a .mat file
+SaveMat = 1;
+% Speed and Froude number plot
+SpdFrd = 1;
+% Stack plot: Distribution
+% plot modeled distributions on top of data
+StackDist = 1;
+% concentration profiles plot
+Cfig=0;
+% plot observed distributions
+ObsDist=1;
+% plot modeled distributions
+ModDist=0;
+% plot deposit formation history
+LayerForm=1;
+% plot check convergence
+% useful figures if the model is not converging
+% shows how parameters change for each iteration 
+CheckConv = 0;
+
+%% SETUP - get paths and input data ready for model runs
+
 % path to model run file
 inv_model_name = 'Tsunami_InvVelModel_V3p8';
 [inv_model_path, ~, ~] = fileparts(which(inv_model_name));
@@ -78,39 +94,17 @@ elseif rdr == 0
         uniform_GS_csv_reader('infile',[fname],'Drange',Drange,'PHIrange',PHIrange);        
 end
 
-%Take what you need from SED_size_reader
+% Take what you need from SED_size_reader, make structure to input to model
 matIn.phi=SedSize.phi;
 matIn.wt=SedSize.Bulk.wt;
 matIn.interval_weights = SedSize.wt;
+matIn.mindepth = SedSize.mindepth;
+matIn.maxdepth = SedSize.maxdepth;
 matIn.th=(max(SedSize.maxdepth)-min(SedSize.mindepth))/100;
-matIn.Trench_ID = Trench_ID;
+matIn.Trench_ID = SedSize.Tname;
 matIn.Drange = Drange;
 matIn.PHIrange = PHIrange;
 
-% open file to write output
-out_file_name = ['Inv-V3p8_results_',SedSize.Tname,'_',num2str(Drange(1)),...
-                '-',num2str(Drange(2)),'cm_','model_output.csv'];
-out_file_path = fullfile(pwd, out_file_name);
-if exist(out_file_path)
-    fid=fopen(out_file_path,'a');
-else
-    % if output file for this deposit interval doesn't already exist, write
-    % a new output file with headers
-    fid = fopen(out_file_path, 'w');
-    fprintf(fid, repmat('%s,', 1, 26), 'trench_id', 'min_depth_cm',...
-            'max_depth_cm', 'param', 'model_name', 'date_time',...
-            'root_square_error', 'run_time', 'iterations',...
-            'phi_min', 'phi_max', 'deposit_thickness_m',...
-            'flow_depth_m', 'N_size_classes', 'mean_grain_diameter_m',...
-            'eddy_viscosity_profile', 'ustarc_mps', 'zo_tot', 'thload_m',...
-            'predict_ss_load_m', 'max_speed_mps', 'avg_speed_mps',...
-            'max_froude', 'avg_froude', 'total_Ca',...
-            'depth_averaged_total_suspended_load');
-    fprintf(fid,'\n');
-end
-% format strings for writing csv file
-f_str1='%s,%4.2f,%4.2f,%.3e,%s,%s,%4.2f,%4.2f,%i,%4.2f,%4.2f,%4.3f,%4.2f,%i,%.3e,%s,%4.2f,%.3e,%4.3f,%4.3f,%5.2f,%5.2f,%4.2f,%4.2f,%.3e,%.3e,\n';
-f_str2='%s,%4.2f,%4.2f,%.3e,%s,%s,%4.2f,,,,,,,,,,,,,,,,,,,,\n';
 
 %% RUN MODEL - model runs here, and error calculations
 
@@ -129,6 +123,10 @@ f_str2='%s,%4.2f,%4.2f,%.3e,%s,%s,%4.2f,,,,,,,,,,,,,,,,,,,,\n';
 
 % loop through param values, run model with each value
 for i=1:length(param)
+    % write param to console
+    fprintf(1, '\n\n%s\n%s %4.2f\n',...
+            '#########################################################',...
+            'param = ', param(i))
     % run model 
     [modelOUT(i)]=Tsunami_InvVelModel_V3p8('infile', inv_modelP_file,...
                                              'grading', grading,...
@@ -138,217 +136,83 @@ for i=1:length(param)
                                              'sname', sname,...
                                              'eddyViscShape', 3);
     
-    AvgSpeed(i,1)=modelOUT(i).results.AvgSpeed;
-    AvgFroude(i,1)=modelOUT(i).results.AvgFroude;
-    
-    % calculate root square error between modeled and observed grain size
-    % distribution for each sub-interval
-    n_intervals = length(modelOUT(1).gradOut.midint);
-    
-    %flip model output so order of levels in observed and modeled wts match
-    % 4/29/15 BL fixed csv output file issue (RSE values correct but in
-    % wrong order) see issue #5 on github
-    for j=1:n_intervals;
-        
-        % write out the RSE
-        fprintf(1,'%s %4.2f %s %4.1f %s %4.1f %s %4.2f \n','RSE for ',param(i),...
-                'interval', SedSize.mindepth(j), '-', SedSize.maxdepth(j),... 
-                'cm : ', modelOUT(i).results.RSE(j))
-
-    end
-    % calculate mean RSE
-    fprintf(1,'%s %4.2f %s %4.2f \n','RSE for ',param(i),...
-            'for the entire layer is ', modelOUT(i).results.mean_RSE)
-    fprintf(1,'%s %5.2f %5.2f\n','Phi Range is ',PHIrange);
+    % close figures made by grading subfunction
+    close
    
-    % write an output file, with one entry for each calculated RMS error
-    for jj=0:n_intervals;
-        if jj == 0
-            % full interval results
-            fprintf(fid, f_str1, SedSize.Tname, Drange(1), Drange(2), param(i),...
-                inv_model_name, modelOUT(i).details.timestamp,... 
-                modelOUT(i).results.mean_RSE,...
-                modelOUT(i).details.elapsed_time, modelOUT(i).details.iterations,...
-                PHIrange(1), PHIrange(2),...
-                modelOUT(i).siteInfo.depositThickness, modelOUT(i).siteInfo.depth,...
-                modelOUT(i).details.n_sedsize_class, modelOUT(i).details.mean_grain_diameter_m,...
-                modelOUT(i).details.eddy_viscosity_profile, modelOUT(i).results.ustrc,...
-                modelOUT(i).results.zotot, modelOUT(i).results.thload,...
-                modelOUT(i).results.predicted_ss_load, modelOUT(i).results.MaxSpeed,...
-                modelOUT(i).results.AvgSpeed, modelOUT(i).results.MaxFroude,...
-                modelOUT(i).results.AvgFroude, modelOUT(i).results.total_Ca,...
-                modelOUT(i).results.depth_averaged_total_suspended_load);
-        else
-            % abridged results for sub-interval (individual samples)
-            fprintf(fid, f_str2, SedSize.Tname, SedSize.mindepth(jj),...
-                    SedSize.maxdepth(jj), param(i), inv_model_name,...
-                    modelOUT(i).details.timestamp, modelOUT(i).results.RSE(jj));
-        end
-        
-    end
-    
-    % closes Tsunami_InvVelModel_V3p6 figures, get rid of close if you want those figures
-    close;  
 end
 
-% close output file
-fclose(fid);
+%% Save figure folder
 
-% save model output structure as a .mat file
-mat_name=strcat('Inv-V3p8_results_',SedSize.Tname,'_',num2str(Drange(1)),...
-                '-',num2str(Drange(2)),'cm_',datestr(now, 30),'.mat');
-save(fullfile(mpath, mat_name), 'modelOUT', 'param')
+fpath = fullfile(pwd, 'figures');
+if ~exist(fpath) && Save.ALL == 1
+    mkdir(fpath);
+end
+
+%% write csv output file
+
+if WriteCSV == 1
+    % create file path to write output csv to
+    out_file_name = ['Inv-V3p8_results_',SedSize.Tname,'_',num2str(Drange(1)),...
+                '-',num2str(Drange(2)),'cm_','model_output.csv'];
+    out_file_path = fullfile(pwd, out_file_name);
+    write_csv_output_file
+end
+
+%% save model output structure as a .mat file
+
+if SaveMat == 1
+    % Save mat folder
+    mpath = fullfile(pwd, 'mat_outputs');
+    if ~exist(mpath)
+        mkdir(mpath);
+    end
+    % save mat name
+    mat_name=strcat('Inv-V3p8_results_',SedSize.Tname,'_',num2str(Drange(1)),...
+                    '-',num2str(Drange(2)),'cm_',datestr(now, 30),'.mat');
+    save(fullfile(mpath, mat_name), 'modelOUT', 'param')
+end
 
 %% Speed and Froude number plot
-%close all;clc; Mark closes all figures and clear the command line for
-%running in cells
-subplot(1,2,1)
-plot(param,AvgSpeed);
-box on; grid on;
 
-
-xlabel('Parameter value');
-ylabel('AvgSpeed (m/s)');
-subplot(1,2,2)
-plot(param,AvgFroude);
-box on; grid on;
-xlabel('Parameter value');
-ylabel('AvgFroude');
-% change if you want to resize figures
-set(gcf, 'PaperPositionMode', 'manual','PaperUnits','inches','units','inches',...
-    'position',[1 1 6 5], 'PaperPosition', [0 0 6 5])
-
-% change -r300 to up the dpi; e.g., -r600 is 600 dpi
-% to change file type to editable in illustrator change '-djpeg' to
-% '-depsc' or '-dill'
-if Save.ALL==1
-    print('-r300','-djpeg', fullfile(fpath, ['Results_',...
-        char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf.jpg']))
+if SpdFrd == 1
+    speed_and_froude_number_plot
 end
+
 %% Stack plot: Distribution
-%close all;clc; Mark closes all figures and clear the command line for
-%running in cells
-max_shift=50;  % change if distributions are overlapping vert.  default 25
-%Plot: Image with stats
-figure('name',['Plot: Image with stats: ' sname '_' SedSize.Tname]); hold on;
-for tt=1:length(SedSize.phi)
-    temp=0:max_shift:(length(SedSize.wt(1,:))-1)*max_shift;
-    ttemp(tt,:)=temp;
-end
-% Bruce changed plotting to data marked with dots and model a line
-if length(SedSize.Sample_ID)>1
-    plot(SedSize.phi,fliplr(fliplr(SedSize.wt)*100+ttemp),'.')%flipped to make lengend work better
-    for i=1:length(param)
-        if i==1;
-            plot(SedSize.phi,(modelOUT(i).gradOut.wpc)'+ttemp,'m')%flipped to make lengend work better
-        elseif i==2
-            plot(SedSize.phi,(modelOUT(i).gradOut.wpc)'+ttemp,'c')%flipped to make lengend work better
-        else
-            plot(SedSize.phi,(modelOUT(i).gradOut.wpc)'+ttemp,'k')%flipped to make lengend work better
-        end
-    end
-    title([sname ': ' SedSize.Tname])
-    ylim([0 (length(SedSize.Sample_ID))*max_shift])
-    if length(SedSize.Sample_ID)<15
-        set(gca,'ytick',[0:max_shift/2:(length(SedSize.Sample_ID))*max_shift],'yticklabel',[0 max_shift/2],'Ygrid','on')
-    else
-        set(gca,'ytick',[0:max_shift:(length(SedSize.Sample_ID))*max_shift],'yticklabel',[],'Ygrid','on')
-    end
-    xlabel('Grain Size [phi]')
-    ylabel('weight %')
-    t= legend(SedSize.range,'orientation','vertical','location','eastoutside');
-    set(get(t, 'title'), 'String' , 'Depth [cm]');
-    grid on
-    box on
-    % sets display and print size  of figure
-    set(gcf, 'PaperPositionMode', 'manual','PaperUnits','inches','units','inches',...
-        'position',[1 1 8 10], 'PaperPosition', [1 1 4 5])
+% plot modeled distributions on top of data
 
-    if Save.ALL==1
-        %print('-r200','-djpeg',['Stack_',...
-            print('-r600','-depsc', fullfile(fpath, ['Stack_',...
-            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf.eps']))
-    end
+if StackDist == 1
+    stack_plot_distribution
 end
-%%
-% looking at concentration profiles
-Cfig=0;
+
+%% concentration profiles plot
+
 if Cfig==1
-    figure
-    plot(modelOUT(1).details.C,modelOUT(1).details.z)
-    figure
-    semilogx(modelOUT(1).details.C,modelOUT(1).details.z);xlim([0,0.01])
+    concentration_profiles_plot
 end
-%%
-% plotting distributions observed together, modeled distribution together
-% plot observed distributions
-ObsDist=1;
+
+%% plot observed distributions
+
 if ObsDist==1
-    figure
-    plot(SedSize.phi,fliplr(fliplr(SedSize.wt)*100))
-    title([sname ': ' SedSize.Tname ' Observed Distributions'])
-    ylim([0 30]) % default is 25 for Wt. percent, can change
-   % if length(SedSize.Sample_ID)<15
-   %     set(gca,'ytick',[0:max_shift/2:(length(SedSize.Sample_ID))*max_shift],'yticklabel',[0 max_shift/2],'Ygrid','on')
-   % else
-   %    set(gca,'ytick',[0:max_shift:(length(SedSize.Sample_ID))*max_shift],'yticklabel',[],'Ygrid','on')
-   % end
-    xlabel('Grain Size [phi]')
-    ylabel('weight %')
-    t= legend(SedSize.range,'orientation','vertical','location','eastoutside');
-    set(get(t, 'title'), 'String' , 'Depth [cm]');clear figures
-    
-    box on
-    % sets display and print size  of figure
-    set(gcf, 'PaperPositionMode', 'manual','PaperUnits','inches','units','inches',...
-        'position',[1 1 8 10], 'PaperPosition', [1 1 4 5])
-
-    if Save.ALL==1
-        print('-r600','-depsc', fullfile(fpath, ['Observed_Dists_',...
-            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf.eps']))
-    end
+    plot_observed_distributions
 end
 
-%%
-% plot modeled distributions
-ModDist=0;
+%% plot modeled distributions
+
 if ModDist==1
-    figure
-    plot(SedSize.phi,flipud(modelOUT.gradOut.wpc))
-    title([sname ': ' SedSize.Tname ' Modeled Distributions'])
-    ylim([0 25])
-    xlabel('Grain Size [phi]')
-    ylabel('% weight')
-    t= legend(SedSize.range,'orientation','vertical','location','eastoutside');
-    set(get(t, 'title'), 'String' , 'Depth [cm]');
-    box on
-    % sets display and print size  of figure
-    set(gcf, 'PaperPositionMode', 'manual','PaperUnits','inches','units','inches',...
-        'position',[1 1 8 10], 'PaperPosition', [1 1 4 5])
-
-    if Save.ALL==1
-        print('-r600','-depsc', fullfile(fpath, ['Modeled_Dists_',...
-            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf.eps']))
-    end
+    plot_modeled_distributions
 end
 
-%%
-% plot deposit formation history
-LayerForm=1;
-if LayerForm==1
-    figure
-    semilogx(gradingD.hittime,gradingD.thickness)
-    title([sname ': ' SedSize.Tname ' Layer Formation ' num2str(Drange(1)),'-',num2str(Drange(2)) ' cm'])
-    ylim([0 max(gradingD.thickness)])
-    xlabel('Time [s]')
-    ylabel('Thickness [m]')
-   
-    % sets display and print size  of figure
-    set(gcf, 'PaperPositionMode', 'manual','PaperUnits','inches','units','inches',...
-        'position',[1 1 8 10], 'PaperPosition', [1 1 4 5])
+%% plot deposit formation history
 
-    if Save.ALL==1
-        print('-r600','-depsc', fullfile(fpath, ['Layer-Formation_',...
-            char(SedSize.Tname),'_',num2str(Drange(1)),'-',num2str(Drange(2)),'cm_gelf.eps']))
-    end
+if LayerForm==1
+    plot_deposit_formation_history
+end
+
+%% plot check convergence
+% useful figures if the model is not converging
+% shows how parameters change for each iteration 
+
+if CheckConv == 1
+    plot_check_convergence
 end

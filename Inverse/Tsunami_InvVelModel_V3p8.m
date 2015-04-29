@@ -490,26 +490,7 @@ if (var==3); ed='Gelfenbaum';end
 et=toc;
 end_time = datestr(now);
 
-fprintf(1,'%s\n',['Done. Elapsed run time: ',...
-    sprintf('%.2f',et),' s'])
-fprintf(1,'\n%s\n','Site Info')
-fprintf('%s\n', char(t))  
-fprintf(1,'%s %4.3f %s\n','Deposit thickness:',th,'m')
-fprintf(1,'%s %4.1f %s\n','Water depth:',h,'m')
-fprintf(1,'%s %i\n','Size classes',nclass)
-fprintf(1,'%s %.3e %s\n','D mean:',Dmn,'m')
-fprintf(1,'%s\n',['Viscosity Profile: ',ed])
-fprintf(1,'\n%s\n','Model Results');
-fprintf(1,'%s %4.2f %s\n','Shear velocity:',ustrc,'m/s')
-fprintf(1,'%s %.3e\n','Bed Roughness:',zotot)
-fprintf(1,'%s %4.3f %s\n','Sediment load needed:',thload,'m')
-fprintf(1,'%s %4.3f %s\n','Sediment load predicted:',predictedssload,'m')
-fprintf(1,'%s %5.2f %s\n','Max. speed:',maximumspeed,'m/s')
-fprintf(1,'%s %5.2f %s\n','Avg. speed:',avgspeed,'m/s')
-fprintf(1,'%s %4.2f\n','Max. Froude:',MaxFroude)
-fprintf(1,'%s %4.2f\n','Avg. Froude:', AvgFroude)
-
-% BL edit 9/11/14: output file now written by run file
+% BL edit output file now written by script called from run file
 
 %write details to structure
 details.ssfrwanted=ssfrwanted;
@@ -589,7 +570,35 @@ if any(strcmpi(varargin,'grading'))==1;
     
 end
 
-
+% print run details to console
+fprintf(1,'%s\n',['Done. Elapsed run time: ',...
+    sprintf('%.2f',et),' s'])
+fprintf(1,'\n%s\n', matIn.Trench_ID)
+fprintf(1, '%s %4.1f - %4.1f %s\n\n', 'Depth range', matIn.Drange, 'cm')
+fprintf(1,'%s %4.3f %s\n','Deposit thickness:',th,'m')
+fprintf(1,'%s %4.1f %s\n','Water depth:',h,'m')
+fprintf(1,'%s %i\n','Size classes',nclass)
+fprintf(1,'%s %.3e %s\n','D mean:',Dmn,'m')
+fprintf(1,'%s\n',['Viscosity Profile: ',ed])
+fprintf(1,'\n%s\n','Model Results');
+fprintf(1,'%s %4.2f %s\n','Shear velocity:',ustrc,'m/s')
+fprintf(1,'%s %.3e\n','Bed Roughness:',zotot)
+fprintf(1,'%s %4.3f %s\n','Sediment load needed:',thload,'m')
+fprintf(1,'%s %4.3f %s\n','Sediment load predicted:',predictedssload,'m')
+fprintf(1,'%s %5.2f %s\n','Max. speed:',maximumspeed,'m/s')
+fprintf(1,'%s %5.2f %s\n','Avg. speed:',avgspeed,'m/s')
+fprintf(1,'%s %4.2f\n','Max. Froude:',MaxFroude)
+fprintf(1,'%s %4.2f\n','Avg. Froude:', AvgFroude)
+% write RSE to console by intervals
+for j=1:length(gradOut.midint);
+    fprintf(1,'%s %4.1f %s %4.1f %s %4.2f \n','RSE for interval',...
+        matIn.mindepth(j), '-', matIn.maxdepth(j),...
+        'cm : ', results.RSE(j))    
+end
+fprintf(1,'%s %4.2f \n','RSE for the entire layer is ',...
+        results.mean_RSE)
+fprintf(1,'%s %5.2f %5.2f\n','Phi Range is ', matIn.PHIrange);
+    
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% MB EDIT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %write output structure
