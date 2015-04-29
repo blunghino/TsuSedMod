@@ -1,4 +1,8 @@
 % Brent Lunghino updated 9/2014:
+%
+% 4/29/15 BL fixed csv output file issue (RSE values correct but in
+% wrong order) see issue #5 on github
+%
 % This script is intended to be run with the working directory set to the
 % location of the .xls file with the grain size data.
 % all that is required in the directory is this run file
@@ -139,7 +143,10 @@ for i=1:length(param)
     % calculate root square error between modeled and observed grain size
     % distribution for each sub-interval
     n_intervals = length(modelOUT(1).gradOut.midint);
+    
     %flip model output so order of levels in observed and modeled wts match
+    % 4/29/15 BL fixed csv output file issue (RSE values correct but in
+    % wrong order) see issue #5 on github
     flip_gradOut_wpc = flipud(modelOUT(i).gradOut.wpc);
     SedWt=(SedSize.wt)*100;  
     for j=1:n_intervals;
