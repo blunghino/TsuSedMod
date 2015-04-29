@@ -2,14 +2,15 @@ close all
 % do you have the suplabel function (available online)
 have_suplabel=1;
 scrsz = get(0,'ScreenSize');
+n_runs = length(modelOUT);
 %% figure showing U*c and ss load off vs N iterations
 figure('Position',[scrsz(3)/4 scrsz(4)/4 scrsz(3)/2.25 scrsz(4)/1.75]);
 ax1 = subplot(2,1,1);
 hold on
 ax2 = subplot(2,1,2);
 hold on
-c = ['r', 'g', 'b'];
-for ii=1:length(modelOUT);
+c = ['r', 'g', 'b', 'c', 'm', 'y', 'k'];
+for ii=1:n_runs;
     axes(ax1);
     h1(ii) = plot(modelOUT(ii).details.offa, c(ii));
     axes(ax2);
@@ -43,13 +44,10 @@ shg;
 % 1 figure made per loop
 for jj=1:3;
     figure('Position',[scrsz(3)/4 scrsz(4)/4 scrsz(3)/2.25 scrsz(4)/1.65]);
-    ax1 = subplot(3,1,1);
-    ax2 = subplot(3,1,2);
-    ax3 = subplot(3,1,3);
     % 1 axes plotted per loop
-    for ii=1:length(modelOUT);
+    for ii=1:n_runs;
         % set which axis to work on
-        eval(['axes(ax',num2str(ii),');']);
+        ax = subplot(n_runs,1,ii);
         hold on
         % set which parameter to plot
         if jj == 1
@@ -68,7 +66,7 @@ for jj=1:3;
         cbar = colorbar;
         cbar_title = get(cbar, 'Title');
         set(cbar_title, 'String', C_label);
-        title(['Mannings n = ', labels(ii)]);
+        title(['Param = ', labels(ii)]);
         ylabel('phi'); 
         try
             xlim([0, plot_check_convergence_x_zoom]);

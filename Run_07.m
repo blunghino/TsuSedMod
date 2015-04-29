@@ -139,14 +139,16 @@ for i=1:length(param)
     % calculate root square error between modeled and observed grain size
     % distribution for each sub-interval
     n_intervals = length(modelOUT(1).gradOut.midint);
-    %flip so order of levels in observed and modeled wts match
-    FlipSedWt=fliplr(SedSize.wt)*100;  
+    %flip model output so order of levels in observed and modeled wts match
+    flip_gradOut_wpc = flipud(modelOUT(i).gradOut.wpc);
+    SedWt=(SedSize.wt)*100;  
     for j=1:n_intervals;
-        root_square_error(i,j)=sqrt(sum(((FlipSedWt(:,j))'-modelOUT(i).gradOut.wpc(j,:)).^2));
+        root_square_error(i,j)=sqrt(sum(((SedWt(:,j))'-flip_gradOut_wpc(j,:)).^2));
 
         % write out the RSE
-        fprintf(1,'%s %4.2f %s %i %s %4.2f \n','RSE for ',param(i),...
-                'interval', j, ' : ', root_square_error(i,j))
+        fprintf(1,'%s %4.2f %s %4.1f %s %4.1f %s %4.2f \n','RSE for ',param(i),...
+                'interval', SedSize.mindepth(j), '-', SedSize.maxdepth(j),... 
+                'cm : ', root_square_error(i,j))
 
     end
     % calculate mean RSE
