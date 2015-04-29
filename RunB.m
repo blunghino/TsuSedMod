@@ -81,6 +81,7 @@ end
 %Take what you need from SED_size_reader
 matIn.phi=SedSize.phi;
 matIn.wt=SedSize.Bulk.wt;
+matIn.interval_weights = SedSize.wt;
 matIn.th=(max(SedSize.maxdepth)-min(SedSize.mindepth))/100;
 matIn.Trench_ID = Trench_ID;
 matIn.Drange = Drange;
@@ -147,21 +148,17 @@ for i=1:length(param)
     %flip model output so order of levels in observed and modeled wts match
     % 4/29/15 BL fixed csv output file issue (RSE values correct but in
     % wrong order) see issue #5 on github
-    flip_gradOut_wpc = flipud(modelOUT(i).gradOut.wpc);
-    SedWt=(SedSize.wt)*100;  
     for j=1:n_intervals;
-        root_square_error(i,j)=sqrt(sum(((SedWt(:,j))'-flip_gradOut_wpc(j,:)).^2));
-
+        
         % write out the RSE
         fprintf(1,'%s %4.2f %s %4.1f %s %4.1f %s %4.2f \n','RSE for ',param(i),...
                 'interval', SedSize.mindepth(j), '-', SedSize.maxdepth(j),... 
-                'cm : ', root_square_error(i,j))
+                'cm : ', modelOUT(i).results.RSE(j))
 
     end
     % calculate mean RSE
-    mean_RSE(i) = mean(root_square_error(i,:));
     fprintf(1,'%s %4.2f %s %4.2f \n','RSE for ',param(i),...
-            'for the entire layer is ', mean_RSE(i))
+            'for the entire layer is ', modelOUT(i).results.mean_RSE)
     fprintf(1,'%s %5.2f %5.2f\n','Phi Range is ',PHIrange);
    
     % write an output file, with one entry for each calculated RMS error
@@ -169,7 +166,8 @@ for i=1:length(param)
         if jj == 0
             % full interval results
             fprintf(fid, f_str1, SedSize.Tname, Drange(1), Drange(2), param(i),...
-                inv_model_name, modelOUT(i).details.timestamp, mean_RSE(i),...
+                inv_model_name, modelOUT(i).details.timestamp,... 
+                modelOUT(i).results.mean_RSE,...
                 modelOUT(i).details.elapsed_time, modelOUT(i).details.iterations,...
                 PHIrange(1), PHIrange(2),...
                 modelOUT(i).siteInfo.depositThickness, modelOUT(i).siteInfo.depth,...
@@ -184,7 +182,7 @@ for i=1:length(param)
             % abridged results for sub-interval (individual samples)
             fprintf(fid, f_str2, SedSize.Tname, SedSize.mindepth(jj),...
                     SedSize.maxdepth(jj), param(i), inv_model_name,...
-                    modelOUT(i).details.timestamp, root_square_error(i, jj));
+                    modelOUT(i).details.timestamp, modelOUT(i).results.RSE(jj));
         end
         
     end
@@ -199,7 +197,7 @@ fclose(fid);
 % save model output structure as a .mat file
 mat_name=strcat('Inv-V3p8_results_',SedSize.Tname,'_',num2str(Drange(1)),...
                 '-',num2str(Drange(2)),'cm_',datestr(now, 30),'.mat');
-save(fullfile(mpath, mat_name), 'modelOUT', 'root_square_error', 'param')
+save(fullfile(mpath, mat_name), 'modelOUT', 'param')
 
 %% Speed and Froude number plot
 %close all;clc; Mark closes all figures and clear the command line for

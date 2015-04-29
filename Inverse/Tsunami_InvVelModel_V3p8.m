@@ -166,9 +166,10 @@ if any(strcmpi(varargin,'matIn'))==1;
     indi=strcmpi(varargin,'matIn');
     ind=find(indi==1);
     matIn=varargin{ind+1};
-    clear datain.phi datain.weights siteInfo.depositThickness
+    clear datain.phi datain.weights datain.interval_weights siteInfo.depositThickness
     datain.phi=matIn.phi;
     datain.weights=matIn.wt;
+    datain.interval_weights = matIn.interval_weights;
     siteInfo.depositThickness=matIn.th;
     siteInfo.matIn = matIn;
 end
@@ -562,7 +563,9 @@ results.AvgSpeed=avgspeed;
 results.MaxSpeed=maximumspeed;
 results.MaxFroude=MaxFroude;
 results.AvgFroude=AvgFroude;
-
+% these are filled below if grading is calculated
+results.RSE = NaN;
+results.mean_RSE = NaN;
 
 %do we want calcluate grading?
 
@@ -580,6 +583,10 @@ if any(strcmpi(varargin,'grading'))==1;
     
     assignin('base','gradingD',gradOut);
     
+    % calculate root square error
+    results.RSE = root_square_error((datain.interval_weights*100)', flipud(gradOut.wpc));
+    results.mean_RSE = mean(results.RSE);
+    
 end
 
 
@@ -594,23 +601,12 @@ modelOUT.results=results;
 
 if exist('gradOut', 'var')
     modelOUT.gradOut=gradOut;
-    
-    SedSize.wt=gradOut.wpc/100;
-    SedSize.middepth=gradOut.midint;
-    SedSize.samplethickness=intv;
-    SedSize.maxdepth=gradOut.midint+intv/2;
-    SedSize.mindepth=gradOut.midint-intv/2;
-
-    SedSize.gradOut=gradOut;
 end
 
-SedSize.phi=phi;
-modelOUT.SedSize=SedSize;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %subfunctions------------------------------------------------------------------------------
-
 
 function [gradOut]=grading(sl,phi,z,intv,porosity)
 
