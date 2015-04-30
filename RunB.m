@@ -1,7 +1,8 @@
 % Brent Lunghino updated 9/2014. 
-% BL updated again on 4/29/2015 (moved many things into subfunctions)
+% BL updated again on 4/29/2015 (moved many lines of code from the runfile
+% into seperate functions or scripts)
 %
-% 4/29/15 BL fixed csv output file issue (RSE values correct but in
+% 4/29/15 BL fixed csv output file bug (RSE values correct but in
 % wrong order) see issue #5 on github
 %
 % This script is intended to be run with the working directory set to the
@@ -74,7 +75,7 @@ CheckConv = 0;
 %% SETUP - get paths and input data ready for model runs
 
 % path to model run file
-inv_model_name = 'Tsunami_InvVelModel_V3p8';
+inv_model_name = 'Tsunami_InvVelModel_V3p9';
 [inv_model_path, ~, ~] = fileparts(which(inv_model_name));
 % path to file specifying default model parameters
 % if not using default model parameters, save model parameters file in pwd
@@ -128,7 +129,7 @@ for i=1:length(param)
             '#########################################################',...
             'param = ', param(i))
     % run model 
-    [modelOUT(i)]=Tsunami_InvVelModel_V3p8('infile', inv_modelP_file,...
+    [modelOUT(i)]=Tsunami_InvVelModel_V3p9('infile', inv_modelP_file,...
                                              'grading', grading,...
                                              'matIn', matIn,...
                                              'mannings', param(i),...
@@ -152,8 +153,8 @@ end
 
 if WriteCSV == 1
     % create file path to write output csv to
-    out_file_name = ['Inv-V3p8_results_',SedSize.Tname,'_',num2str(Drange(1)),...
-                '-',num2str(Drange(2)),'cm_','model_output.csv'];
+    out_file_name = [inv_model_name,'_results_',SedSize.Tname,'_',...
+                     num2str(Drange(1)),'-',num2str(Drange(2)),'cm.csv'];
     out_file_path = fullfile(pwd, out_file_name);
     write_csv_output_file
 end
@@ -167,7 +168,7 @@ if SaveMat == 1
         mkdir(mpath);
     end
     % save mat name
-    mat_name=strcat('Inv-V3p8_results_',SedSize.Tname,'_',num2str(Drange(1)),...
+    mat_name=strcat(inv_model_name,'_',SedSize.Tname,'_',num2str(Drange(1)),...
                     '-',num2str(Drange(2)),'cm_',datestr(now, 30),'.mat');
     save(fullfile(mpath, mat_name), 'modelOUT', 'param')
 end
