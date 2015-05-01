@@ -1,9 +1,10 @@
-function [modelOUT]=Tsunami_InvVelModel_V3p9(varargin)
-%Tsunami_InvVelModel_V3p5 - Estimates water velocity from tsunami sediment deposit.
+function [modelOUT]=Tsunami_InvVelModel_V4p0(varargin)
+%Tsunami_InvVelModel_V4p0 - Estimates water velocity from tsunami sediment deposit.
 %
 % Assumes steady uniform flow.
 % Bruce Jaffe, USGS
 % First version written March 12, 2001
+%
 % Functions needed: phi2mm.m, sw_dens0.m, sw_smow.m, KinVisc.m, UstarCrit.m, zoWS.m,  
 %                   dietrichWs.m, Setvel1.m, tubesetvel.m, linearK.m, parabolicK.m, gelfK.m    
 % 	Inputs:
@@ -132,6 +133,8 @@ function [modelOUT]=Tsunami_InvVelModel_V3p9(varargin)
 %   allowing single size class runs
 %   modified 4/29/08 to output weight percent (Bruce Jaffe) and to fix grading function
 %   interval error (Mark Buckley)
+%   V3p8 by Brent Lunghino (see commit log on GitHub)
+%   V4p0 updated on 4/29/15 by Brent Lunghino
 
 
 fprintf(1,'\n%s\n',[datestr(now),' --- ',mfilename,' running...'])

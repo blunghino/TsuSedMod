@@ -1,6 +1,6 @@
 % Brent Lunghino updated 9/2014. 
 % BL updated again on 4/29/2015 (moved many lines of code from the runfile
-% into seperate functions or scripts)
+% into seperate functions or scripts) "RunB and model V4p0"
 %
 % 4/29/15 BL fixed csv output file bug (RSE values correct but in
 % wrong order) see issue #5 on github
@@ -75,7 +75,7 @@ CheckConv = 0;
 %% SETUP - get paths and input data ready for model runs
 
 % path to model run file
-inv_model_name = 'Tsunami_InvVelModel_V3p9';
+inv_model_name = 'Tsunami_InvVelModel_V4p0';
 [inv_model_path, ~, ~] = fileparts(which(inv_model_name));
 % path to file specifying default model parameters
 % if not using default model parameters, save model parameters file in pwd
@@ -129,7 +129,7 @@ for i=1:length(param)
             '#########################################################',...
             'param = ', param(i))
     % run model 
-    [modelOUT(i)]=Tsunami_InvVelModel_V3p9('infile', inv_modelP_file,...
+    [modelOUT(i)]=Tsunami_InvVelModel_V4p0('infile', inv_modelP_file,...
                                              'grading', grading,...
                                              'matIn', matIn,...
                                              'mannings', param(i),...
