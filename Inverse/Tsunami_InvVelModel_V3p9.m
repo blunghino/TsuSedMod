@@ -1,4 +1,4 @@
-function [modelOUT]=Tsunami_InvVelModel_V3p8(varargin)
+function [modelOUT]=Tsunami_InvVelModel_V3p9(varargin)
 %Tsunami_InvVelModel_V3p5 - Estimates water velocity from tsunami sediment deposit.
 %
 % Assumes steady uniform flow.
