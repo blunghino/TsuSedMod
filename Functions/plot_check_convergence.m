@@ -64,8 +64,12 @@ for jj=1:3;
         p = pcolor(linspace(1, N, N), modelOUT(ii).datain.phi, C);
         shading interp
         cbar = colorbar;
-        cbar_title = get(cbar, 'Title');
-        set(cbar_title, 'String', C_label);
+        try
+            cbar_title = get(cbar, 'Title');
+            set(cbar_title, 'String', C_label);
+        catch
+            cbar.Label.String = C_label;
+        end
         title(['Param = ', labels(ii)]);
         ylabel('phi'); 
         try

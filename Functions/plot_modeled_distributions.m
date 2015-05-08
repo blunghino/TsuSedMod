@@ -5,7 +5,10 @@ ylim([0 25])
 xlabel('Grain Size [phi]')
 ylabel('% weight')
 t= legend(SedSize.range,'orientation','vertical','location','eastoutside');
-set(get(t, 'title'), 'String' , 'Depth [cm]');
+try
+    set(get(t, 'title'), 'String' , 'Depth [cm]');
+catch
+end
 box on
 % sets display and print size  of figure
 set(gcf, 'PaperPositionMode', 'manual','PaperUnits','inches','units','inches',...

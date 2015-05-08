@@ -10,8 +10,10 @@ ylim([0 30]) % default is 25 for Wt. percent, can change
 xlabel('Grain Size [phi]')
 ylabel('weight %')
 t= legend(SedSize.range,'orientation','vertical','location','eastoutside');
-set(get(t, 'title'), 'String' , 'Depth [cm]');clear figures
-
+try
+    set(get(t, 'title'), 'String' , 'Depth [cm]');clear figures
+catch
+end
 box on
 % sets display and print size  of figure
 set(gcf, 'PaperPositionMode', 'manual','PaperUnits','inches','units','inches',...
